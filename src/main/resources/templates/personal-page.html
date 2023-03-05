@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Page</title>
+</head>
+<body>
+<form th:action="@{/api/cards/getCard}" method="post"
+      th:object="${card}">
+    <a th:href="@{/api/cards/getCard}">Get New Card</a>
+</form>
+</body>
+</html>
