@@ -16,7 +16,7 @@ public class Card {
     @Column(name = "card_id")
     private long id;
     @Column(name = "card_number")
-    private long number;
+    private String number;
     @Column(name = "card_expirationDate")
     private String expirationDate;
     @Column(name = "card_cvv")
