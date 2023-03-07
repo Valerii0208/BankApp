@@ -1,22 +1,39 @@
 package com.example.bankdemo.service.impl;
 
 import com.example.bankdemo.entity.Card;
+import com.example.bankdemo.entity.User;
 import com.example.bankdemo.entity.enm.CardType;
+import com.example.bankdemo.entity.enm.PaymentSystem;
 import com.example.bankdemo.repository.CardRepository;
 import com.example.bankdemo.service.CardService;
+import com.example.bankdemo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class CardServiceImpl implements CardService {
     private final CardRepository cardRepository;
+
+    private final UserService userService;
     @Override
-    public Card createNewCard(Card card) {
+    public Card createNewCard(User user) {
         Random random = new Random();
-        card.setNumber(generateBankCardNumber("VISA"));
+        Card card = new Card();
+
+
+
+        PaymentSystem[] paymentSystems = PaymentSystem.values();
+        int randomIndexForPaymentSystem = random.nextInt(paymentSystems.length);
+        PaymentSystem randomPaymentSystem = paymentSystems[randomIndexForPaymentSystem];
+        card.setPaymentSystem(randomPaymentSystem);
+
+        card.setNumber(generateBankCardNumber(randomPaymentSystem.toString()));
 
         final int MIN_BOUND_OF_CARD_YEAR = 28;
         final int MAX_BOUND_OF_CARD_YEAR = 35;
@@ -31,18 +48,24 @@ public class CardServiceImpl implements CardService {
         final int MAX_BOUND_OF_CARD_CVV_CODE = 999;
         card.setCvv(random.nextInt((MAX_BOUND_OF_CARD_CVV_CODE - MIN_BOUND_OF_CARD_CVV_CODE) + 1) + MIN_BOUND_OF_CARD_CVV_CODE);
 
-        card.setCardType(CardType.CREDIT);
+        CardType[] cardType = CardType.values();
+        int randomIndexForCardType = random.nextInt(cardType.length);
+        CardType randomCardType = cardType[randomIndexForCardType];
+
+
+        card.setCardType(randomCardType);
         card.setActive(true);
 
-        return cardRepository.save(card);
+        card.setUser(user);
+        cardRepository.save(card);
+
+        return card;
     }
 
-    // Card number generation method based on Luhn algorithm
     public static String generateBankCardNumber(String cardType) {
         Random rand = new Random();
         String bankNumber = "";
 
-        // Generate a random number based on the card type
         if (cardType.equals("VISA")) {
             bankNumber += "4";
             for (int i = 1; i < 16; i++) {
@@ -54,18 +77,10 @@ public class CardServiceImpl implements CardService {
             for (int i = 2; i < 16; i++) {
                 bankNumber += rand.nextInt(10);
             }
-        } else if (cardType.equals("American Express")) {
-            bankNumber += "3";
-            bankNumber += (rand.nextInt(4) + 4);
-            bankNumber += (rand.nextInt(10));
-            for (int i = 3; i < 15; i++) {
-                bankNumber += rand.nextInt(10);
-            }
         } else {
             return "Invalid card type";
         }
 
-        // Calculate the check digit using the Luhn algorithm
         int[] digits = new int[bankNumber.length()];
         for (int i = 0; i < bankNumber.length(); i++) {
             digits[i] = Character.getNumericValue(bankNumber.charAt(i));
@@ -85,5 +100,16 @@ public class CardServiceImpl implements CardService {
 
         // Return the complete bank card number
         return bankNumber + checkDigit;
+    }
+
+    @Override
+    public List<Card> getAllCardsForCurrentUSer() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.findByLogin(username);
+
+        List<Card> cards = user.getCards();
+
+        return cards;
     }
 }

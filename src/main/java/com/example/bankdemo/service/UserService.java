@@ -4,4 +4,6 @@ import com.example.bankdemo.entity.User;
 
 public interface UserService {
     User create(User user);
+
+    User findByLogin(String login);
 }

@@ -3,8 +3,11 @@ package com.example.bankdemo.web;
 import com.example.bankdemo.entity.User;
 import com.example.bankdemo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +27,12 @@ public class UserController {
         return "registration-success";
     }
 
-    @GetMapping("/personal-page")
-    public String personalPage() {
+  @GetMapping("/personal-page")
+    public String personalPage(Model model) {
+      Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+      String username = auth.getName();
+      User user = userService.findByLogin(username);
+      model.addAttribute("user", user);
         return "personal-page";
     }
 }

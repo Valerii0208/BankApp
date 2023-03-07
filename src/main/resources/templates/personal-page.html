@@ -1,13 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en"
+      xmlmns:th="https://www.thymeleaf.org" xmlns:xmlmns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <title>Personal Page</title>
+  <meta charset="UTF-8">
+  <title>Personal page</title>
+  <link rel="stylesheet" type="text/css" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
 </head>
 <body>
-<form th:action="@{/api/cards/getCard}" method="post"
-      th:object="${card}">
-    <a th:href="@{/api/cards/getCard}">Get New Card</a>
+<h1>Welcome, <span th:text="${user.firstname}"></span>!</h1>
+<p>Email: <span th:text="${user.login}"></span></p>
+
+<form th:action="@{/api/users/addCard}" method="post">
+  <button type="submit" class="btn btn-primary">Add Card</button>
+</form>
+
+<form th:action="@{/api/users/showAllCards}">
+  <button type="submit" class="btn btn-primary">Show all my cards</button>
 </form>
 </body>
 </html>
